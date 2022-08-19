@@ -48,13 +48,13 @@ def intradaySearchFunction(inputDate, inputContract, inputCookie):
     if not isExist:
         os.makedirs(folderName)
     fileName = now.strftime("%H%M%S") + ".txt"
-    f=open("./" + folderName + "/" + fileName,'w')
+    #f=open("./" + folderName + "/" + fileName,'w')
     for x in reversed(range(size)):
         if list[x]['TradeTime'] > "08:59:00" and list[x]['TradeTime'] < "14:30:00" and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
             #f.seek(0) #get to the first position
             output = str(list[x]['TradeTime']) + " | " + str(list[x]['BidPrice1']) + " | " + str(list[x]['MatchedPrice']) + " | " + str(list[x]['OfferPrice1'])
-            f.write(output)
-            f.write("\n")
+            #f.write(output)
+            #f.write("\n")
             if round(list[x]['BidPrice1'] - list[x - 1]['BidPrice1'], 1) >= diff and round(list[x]['BidPrice1'] - list[x]['MatchedPrice'], 1) >= diff and round(list[x]['OfferPrice1'] - list[x]['MatchedPrice'], 1) >= diff and round(list[x]['OfferPrice1'] - list[x - 1]['OfferPrice1'], 1) >= diff:
                 print(output + " | LONG")
                 long_cnt = long_cnt + 1
@@ -63,7 +63,7 @@ def intradaySearchFunction(inputDate, inputContract, inputCookie):
                 short_cnt = short_cnt + 1
         total_match_vol = total_match_vol + list[x]['MatchedVol'] 
     print("Total LONG = " + str(long_cnt) + " | Total SHORT = " + str(short_cnt) + " | Total Matched Vol = " + str(total_match_vol * 10))
-    f.close()    
+    #f.close()    
     
 
 if __name__=="__main__":
