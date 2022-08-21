@@ -24,8 +24,11 @@ def callLiveDragon(checkDate, checkContract):
     Cookie = CookiePartOne + CookiePartTwo + CookiePartThree + CookiePartFour + CookiePartFive
     #print (Cookie)
     workingTime = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")    
-    print ("--------workingTime = " + workingTime + "--------")
-    print ("checkDate = " + checkDate + " checkContract = " + checkContract)
+    print ("---------------workingTime = " + workingTime + "---------------")
+    print ("--------checkDate = " + checkDate + " checkContract = " + checkContract + "--------")
+    print ("----------------------------------------------------------------")
+    print ("TradeTime|  Bid1  | MPrice | Offer1 | Shark | gapVol | MTotalVol")
+    print ("----------------------------------------------------------------")
     intradaySearch.intradaySearchFunction(checkDate, checkContract, Cookie)
     
 if __name__=="__main__":    
