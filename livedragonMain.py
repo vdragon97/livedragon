@@ -7,7 +7,7 @@ import time
 import sys
 from datetime import datetime
 
-def callLiveDragon(checkDate, checkContract):
+def callLiveDragon(checkDate, checkContract, checkSensitive):
     CookiePartOne = intradayBoard.accessMainPage()
     #print("CookiePartOne = " + CookiePartOne)
     if CookiePartOne =="exitMainPage":
@@ -25,16 +25,16 @@ def callLiveDragon(checkDate, checkContract):
     #print (Cookie)
     workingTime = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")    
     print ("---------------workingTime = " + workingTime + "---------------")
-    print ("--------checkDate = " + checkDate + " checkContract = " + checkContract + "--------")
+    print ("checkDate = " + checkDate + " checkContract = " + checkContract + " Sensitive = " + checkSensitive)
     print ("----------------------------------------------------------------")
     print ("TradeTime|  Bid1  | MPrice | Offer1 | Shark | gapVol | MTotalVol")
     print ("----------------------------------------------------------------")
-    intradaySearch.intradaySearchFunction(checkDate, checkContract, Cookie)
+    intradaySearch.intradaySearchFunction(checkDate, checkContract, checkSensitive, Cookie)
     
 if __name__=="__main__":    
     while(True):
         if (len(sys.argv) > 1):
-            callLiveDragon(sys.argv[1], sys.argv[2])
+            callLiveDragon(sys.argv[1], sys.argv[2], sys.argv[3])
         else: 
             #print(datetime.now().strftime("%d/%m/%Y"))
             #print("VN30F" + datetime.now().strftime("%Y")[2:4] + datetime.now().strftime("%m"))

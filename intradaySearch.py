@@ -11,7 +11,7 @@ inputDate: dd/mm/yyyy
 inputMode: all/ctn
 '''
 
-def intradaySearchFunction(inputDate, inputContract, inputCookie):   
+def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie):   
     url = "https://livedragon.vdsc.com.vn/general/intradaySearch.rv?stockCode=" + inputContract +"&boardDate=" + inputDate
     headers = CaseInsensitiveDict()
     headers["Content-Length"] = "0"
@@ -35,7 +35,7 @@ def intradaySearchFunction(inputDate, inputContract, inputCookie):
         "list": [{}, {}, ...{}]
     }
     '''
-    diff = 0.8
+    sensitive = round(float(inputSensitive), 1)
     long_cnt = 0
     short_cnt = 0
     total_match_vol = 0
@@ -59,28 +59,34 @@ def intradaySearchFunction(inputDate, inputContract, inputCookie):
             #f.write("\n")
             n = 0
             listMatchedTotalVol = []
-            if round(list[x]['BidPrice1'] - list[x - 1]['BidPrice1'], 1) >= diff and round(list[x]['BidPrice1'] - list[x]['MatchedPrice'], 1) >= diff and round(list[x]['OfferPrice1'] - list[x]['MatchedPrice'], 1) >= diff and round(list[x]['OfferPrice1'] - list[x - 1]['OfferPrice1'], 1) >= diff:
-                while list[x]['BidPrice1'] == list[x + n]['BidPrice1'] and list[x]['OfferPrice1'] == list[x + n]['OfferPrice1']:
-                    #print(f"{list[x + n]['MatchedTotalVol']:,d}")
-                    listMatchedTotalVol.append(list[x + n]['MatchedTotalVol'])
-                    n = n + 1
-                gapLongVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
-                total_gap_long_vol = total_gap_long_vol + gapLongVol
-                print(output + " | LONG  | " + str(f"{gapLongVol:,d}").rjust(6," ") + " | " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," "))
-                long_cnt = long_cnt + 1
-            if round(list[x]['BidPrice1'] - list[x - 1]['BidPrice1'], 1) <= -diff and round(list[x]['BidPrice1'] - list[x]['MatchedPrice'], 1) <= -diff and round(list[x]['OfferPrice1'] - list[x]['MatchedPrice'], 1) <= -diff and round(list[x]['OfferPrice1'] - list[x - 1]['OfferPrice1'], 1) <= -diff:
-                while list[x]['BidPrice1'] == list[x + n]['BidPrice1'] and list[x]['OfferPrice1'] == list[x + n]['OfferPrice1']:
-                    #print(f"{list[x + n]['MatchedTotalVol']:,d}")
-                    listMatchedTotalVol.append(list[x + n]['MatchedTotalVol'])
-                    n = n + 1
-                gapShortVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
-                print(output + " | SHORT | " + str(f"{gapShortVol:,d}").rjust(6," ") + " | "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," "))
-                total_gap_short_vol = total_gap_short_vol + gapShortVol
-                short_cnt = short_cnt + 1
+            if round(list[x]['BidPrice1'] - list[x - 1]['BidPrice1'], 1) >= sensitive and round(list[x]['BidPrice1'] - list[x]['MatchedPrice'], 1) >= sensitive and round(list[x]['OfferPrice1'] - list[x]['MatchedPrice'], 1) >= sensitive and round(list[x]['OfferPrice1'] - list[x - 1]['OfferPrice1'], 1) >= sensitive:
+                try:
+                    while list[x]['BidPrice1'] == list[x + n]['BidPrice1'] and list[x]['OfferPrice1'] == list[x + n]['OfferPrice1']:
+                        #print(f"{list[x + n]['MatchedTotalVol']:,d}")
+                        listMatchedTotalVol.append(list[x + n]['MatchedTotalVol'])
+                        n = n + 1
+                    gapLongVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
+                    total_gap_long_vol = total_gap_long_vol + gapLongVol
+                    print(output + " | LONG  | " + str(f"{gapLongVol:,d}").rjust(6," ") + " | " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," "))
+                    long_cnt = long_cnt + 1
+                except:
+                    continue
+            if round(list[x]['BidPrice1'] - list[x - 1]['BidPrice1'], 1) <= -sensitive and round(list[x]['BidPrice1'] - list[x]['MatchedPrice'], 1) <= -sensitive and round(list[x]['OfferPrice1'] - list[x]['MatchedPrice'], 1) <= -sensitive and round(list[x]['OfferPrice1'] - list[x - 1]['OfferPrice1'], 1) <= -sensitive:
+                try:
+                    while list[x]['BidPrice1'] == list[x + n]['BidPrice1'] and list[x]['OfferPrice1'] == list[x + n]['OfferPrice1']:
+                        #print(f"{list[x + n]['MatchedTotalVol']:,d}")
+                        listMatchedTotalVol.append(list[x + n]['MatchedTotalVol'])
+                        n = n + 1
+                    gapShortVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
+                    print(output + " | SHORT | " + str(f"{gapShortVol:,d}").rjust(6," ") + " | "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," "))
+                    total_gap_short_vol = total_gap_short_vol + gapShortVol
+                    short_cnt = short_cnt + 1
+                except:
+                    continue    
         total_match_vol = max(total_match_vol, list[x]['MatchedTotalVol'] )
     print ("----------------------------------------------------------------")
-    print("Total count LONG  = " + str(long_cnt).rjust(3," ") +  "  Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," "))
-    print("Total count SHORT = " + str(short_cnt).rjust(3," ") + "  Total gapVol SHORT = " + str(f"{total_gap_short_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," "))
+    print("Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  =" + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," "))
+    print("Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =" + str(f"{total_gap_short_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," "))
     #f.close()    
     
 
