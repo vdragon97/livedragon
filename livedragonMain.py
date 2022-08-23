@@ -6,6 +6,9 @@ import random
 import time
 import sys
 from datetime import datetime
+from colorama import init, Fore, Back, Style
+
+init(convert=True)
 
 def callLiveDragon(checkDate, checkContract, checkSensitive):
     CookiePartOne = intradayBoard.accessMainPage()
@@ -24,10 +27,10 @@ def callLiveDragon(checkDate, checkContract, checkSensitive):
     Cookie = CookiePartOne + CookiePartTwo + CookiePartThree + CookiePartFour + CookiePartFive
     #print (Cookie)
     workingTime = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")    
-    print ("---------------workingTime = " + workingTime + "---------------")
-    print ("checkDate = " + checkDate + " checkContract = " + checkContract + " Sensitive = " + checkSensitive)
+    print (Fore.YELLOW + "---------------workingTime = " + workingTime + "---------------" + Style.RESET_ALL)
+    print (Fore.YELLOW + "checkDate = " + checkDate + " checkContract = " + checkContract + " Sensitive = " + checkSensitive + Style.RESET_ALL)
     print ("----------------------------------------------------------------")
-    print ("TradeTime|  Bid1  | MPrice | Offer1 | Shark | gapVol | MTotalVol")
+    print (Fore.YELLOW + "TradeTime|  Bid1  | MPrice | Offer1 | Shark | gapVol | MTotalVol" + Style.RESET_ALL)
     print ("----------------------------------------------------------------")
     intradaySearch.intradaySearchFunction(checkDate, checkContract, checkSensitive, Cookie)
     

@@ -3,6 +3,7 @@ import string
 import random
 from requests.structures import CaseInsensitiveDict
 from datetime import datetime
+from colorama import init, Fore, Back, Style
 import os
 '''
 python livedragon.py inputDate inputMode
@@ -10,6 +11,7 @@ python livedragon.py inputDate inputMode
 inputDate: dd/mm/yyyy
 inputMode: all/ctn
 '''
+init(convert=True)
 
 def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie):   
     url = "https://livedragon.vdsc.com.vn/general/intradaySearch.rv?stockCode=" + inputContract +"&boardDate=" + inputDate
@@ -67,7 +69,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                         n = n + 1
                     gapLongVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     total_gap_long_vol = total_gap_long_vol + gapLongVol
-                    print(output + " | LONG  | " + str(f"{gapLongVol:,d}").rjust(6," ") + " | " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," "))
+                    print(Fore.GREEN + output + " | LONG  | " + str(f"{gapLongVol:,d}").rjust(6," ") + " | " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ") + Style.RESET_ALL)
                     long_cnt = long_cnt + 1
                 except:
                     continue
@@ -78,15 +80,15 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                         listMatchedTotalVol.append(list[x + n]['MatchedTotalVol'])
                         n = n + 1
                     gapShortVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
-                    print(output + " | SHORT | " + str(f"{gapShortVol:,d}").rjust(6," ") + " | "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," "))
+                    print(Fore.RED + output + " | SHORT | " + str(f"{gapShortVol:,d}").rjust(6," ") + " | "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ") + Style.RESET_ALL)
                     total_gap_short_vol = total_gap_short_vol + gapShortVol
                     short_cnt = short_cnt + 1
                 except:
                     continue    
         total_match_vol = max(total_match_vol, list[x]['MatchedTotalVol'] )
     print ("----------------------------------------------------------------")
-    print("Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  =" + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," "))
-    print("Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =" + str(f"{total_gap_short_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," "))
+    print(Fore.GREEN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  =" + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL)
+    print(Fore.RED + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =" + str(f"{total_gap_short_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL)
     #f.close()    
     
 
