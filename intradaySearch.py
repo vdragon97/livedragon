@@ -53,8 +53,10 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
         os.makedirs(folderName)
     fileName = now.strftime("%H%M%S") + ".csv"
     f=open("./" + folderName + "/" + fileName,'w')
+    #add column name
+    f.write("TradeTime|Bid1|MatchedPrice|Offer1|Shark|gapLongVol|gapShortVol|MTotalVol" + "\n")
     for x in reversed(range(size)):
-        if list[x]['TradeTime'] > "08:59:00" and list[x]['TradeTime'] < "14:30:00" and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
+        if list[x]['TradeTime'] > "09:00:00" and list[x]['TradeTime'] < "14:30:00" and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
             #f.seek(0) #get to the first position
             output_price = str(list[x]['TradeTime']) + " | " + str(list[x]['BidPrice1']) + " | " + str(list[x]['MatchedPrice']) + " | " + str(list[x]['OfferPrice1'])
             #f.write(output_price)
@@ -93,8 +95,11 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                     continue    
         total_match_vol = max(total_match_vol, list[x]['MatchedTotalVol'] )
     print ("---------------------------------------------------------------------------")
-    print(Fore.GREEN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL)
-    print(Fore.RED + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT = " + str(f"{total_gap_short_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL)
+    try:
+        print(Fore.GREEN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL)
+        print(Fore.RED + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT = " + str(f"{total_gap_short_vol:,d}").rjust(6," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL)
+    except:
+        pass
     print ("---------------------------------------------------------------------------")
     f.close()    
     
