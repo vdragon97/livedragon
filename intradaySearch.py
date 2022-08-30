@@ -13,7 +13,7 @@ inputMode: all/ctn
 '''
 init(convert=True)
 
-def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie):   
+def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie, inputFromTime, inputToTime):   
     url = "https://livedragon.vdsc.com.vn/general/intradaySearch.rv?stockCode=" + inputContract +"&boardDate=" + inputDate
     headers = CaseInsensitiveDict()
     headers["Content-Length"] = "0"
@@ -55,8 +55,9 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     f=open("./" + folderName + "/" + fileName,'w')
     #add column name
     f.write("TradeTime|Bid1|MatchedPrice|Offer1|Shark|gapLongVol|gapShortVol|MTotalVol" + "\n")
+    signal_yn = "N"
     for x in reversed(range(size)):
-        if list[x]['TradeTime'] > "09:00:00" and list[x]['TradeTime'] < "14:30:00" and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
+        if list[x]['TradeTime'] > "09:00:00" and list[x]['TradeTime'] > inputFromTime and list[x]['TradeTime'] < "14:30:00" and list[x]['TradeTime'] < inputToTime and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
             #f.seek(0) #get to the first position
             output_price = str(list[x]['TradeTime']) + " | " + str(list[x]['BidPrice1']) + " | " + str(list[x]['MatchedPrice']) + " | " + str(list[x]['OfferPrice1'])
             #f.write(output_price)
@@ -78,8 +79,11 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                     long_cnt = long_cnt + 1
                 except:
                     continue
-                signal_long = Fore.CYAN + "!" + Style.RESET_ALL
-                signal_short = ""
+                if signal_yn == "N":
+                    signal_time_long = list[x]['TradeTime']
+                    signal_long = "!"
+                    signal_short = ""
+                    signal_yn = "Y"
             if round(list[x]['BidPrice1'] - list[x - 1]['BidPrice1'], 1) <= -sensitive and round(list[x]['BidPrice1'] - list[x]['MatchedPrice'], 1) <= -sensitive and round(list[x]['OfferPrice1'] - list[x]['MatchedPrice'], 1) <= -sensitive and round(list[x]['OfferPrice1'] - list[x - 1]['OfferPrice1'], 1) <= -sensitive:
                 try:
                     while list[x]['BidPrice1'] == list[x + n]['BidPrice1'] and list[x]['OfferPrice1'] == list[x + n]['OfferPrice1']:
@@ -95,13 +99,22 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                     short_cnt = short_cnt + 1
                 except:
                     continue
-                signal_long = ""
-                signal_short = Fore.WHITE + "!" + Style.RESET_ALL
+                if signal_yn == "N":
+                    signal_time_short = list[x]['TradeTime']
+                    signal_long = ""
+                    signal_short = "!"
+                    signal_yn = "Y"
         total_match_vol = max(total_match_vol, list[x]['MatchedTotalVol'] )
     print ("---------------------------------------------------------------------------")
     try:
-        print(Fore.GREEN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL + signal_long )
-        print(Fore.RED + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =        | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")  + Style.RESET_ALL + signal_short)
+        if signal_long == "!":
+            print(Fore.CYAN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL + signal_long )
+        else:
+            print(Fore.GREEN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL + signal_long )
+        if signal_short == "!":
+            print(Fore.WHITE + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =        | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")  + Style.RESET_ALL + signal_short)
+        else:
+            print(Fore.RED + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =        | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")  + Style.RESET_ALL + signal_short)
     except:
         pass
     print ("---------------------------------------------------------------------------")
@@ -109,4 +122,4 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     
 
 if __name__=="__main__":
-    intradaySearchFunction("05/08/2022", "VN30F2208", "")
+    intradaySearchFunction("05/08/2022", "VN30F2208", "0.8", "09:00:00", "14:30:00")
