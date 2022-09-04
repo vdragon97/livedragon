@@ -26,7 +26,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     try:
         resp = requests.post(url, headers=headers, timeout=10)
     except:
-        print("intradaySearch.py: Try search false")
+        print("intradaySearch.py: Try search false, please check the internet connection")
         return
     #print(resp.headers) #headers looks like that {'Content-Type': 'application/json;charset=UTF-8', 'Content-Language': 'vi-VN', 'Transfer-Encoding': 'chunked', 'Date': 'Fri, 05 Aug 2022 16:28:58 GMT'}
     data = resp.json() #all data is a dictionary
@@ -44,15 +44,19 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     total_gap_long_vol = 0
     total_gap_short_vol = 0
     list = data['list']  #get the list which named "list"
-    size = len(list) #row count of the grid
+    try:
+        size = len(list) #row count of the grid
+    except:
+        print("intradaySearch.py: No data found, please check the input values")
+        return    
     #print("row count = "+ str(size))
     now = datetime.now() # current date and time
     folderName = now.strftime("%Y%m%d") + "-" + inputSensitive
     isExist = os.path.exists("./" + folderName)
     if not isExist:
         os.makedirs(folderName)
-    fileName = now.strftime("%H%M%S") + ".csv"
-    f=open("./" + folderName + "/" + fileName,'w')
+    fileNameDetails = now.strftime("%H%M%S") + ".csv"
+    f=open("./" + folderName + "/" + fileNameDetails,'w')
     #add column name
     f.write("TradeTime|Bid1|MatchedPrice|Offer1|Shark|gapLongVol|gapShortVol|MTotalVol" + "\n")
     signal_yn = "N"
@@ -105,21 +109,30 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                     signal_short = "!"
                     signal_yn = "Y"
         total_match_vol = max(total_match_vol, list[x]['MatchedTotalVol'] )
-    print ("---------------------------------------------------------------------------")
+    f.close()
+        
+    print ("--------------------------------[" + inputDate + "]-------------------------------")
     try:
+        summaryLong = "Total shark LONG  | " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG |  " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ")
         if signal_long == "!":
-            print(Fore.CYAN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL + signal_long )
+            print(Fore.CYAN + summaryLong + Style.RESET_ALL + signal_long )
         else:
-            print(Fore.GREEN + "Total shark LONG  = " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG  = " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ") + Style.RESET_ALL + signal_long )
+            print(Fore.GREEN + summaryLong + Style.RESET_ALL + signal_long )
+        
+        summaryShort = "Total shark SHORT | " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT|         | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")
         if signal_short == "!":
-            print(Fore.WHITE + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =        | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")  + Style.RESET_ALL + signal_short)
+            print(Fore.WHITE + summaryShort + Style.RESET_ALL + signal_short)
         else:
-            print(Fore.RED + "Total shark SHORT = " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT =        | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")  + Style.RESET_ALL + signal_short)
+            print(Fore.RED + summaryShort + Style.RESET_ALL + signal_short)
     except:
         pass
-    print ("---------------------------------------------------------------------------")
-    f.close()    
+    print ("---------------------------------------------------------------------------")    
     
-
+    fileNameSummary = inputContract + "-" + inputSensitive + ".csv"
+    fSum=open("./" + fileNameSummary,'a')
+    fSum.write(inputDate + "|||||\n")
+    fSum.write(summaryLong + "\n")
+    fSum.write(summaryShort + "\n")
+    fSum.close()    
 if __name__=="__main__":
     intradaySearchFunction("05/08/2022", "VN30F2208", "0.8", "09:00:00", "14:30:00")
