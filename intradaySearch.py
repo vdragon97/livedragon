@@ -5,6 +5,7 @@ from requests.structures import CaseInsensitiveDict
 from datetime import datetime
 from colorama import init, Fore, Back, Style
 import os
+import chatBotTelegram
 '''
 python livedragon.py inputDate inputMode
 
@@ -113,18 +114,20 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
         
     print ("--------------------------------[" + inputDate + "]-------------------------------")
     try:
-        summaryLong = "Total shark LONG  | " + str(long_cnt).rjust(3," ") +  " | Total gapVol LONG |  " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         | %V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ")
+        summaryLong = "Total shark LONG  | " + str(long_cnt).rjust(3," ") +  " ||Total gapVol LONG |  " + str(f"{total_gap_long_vol:,d}").rjust(6," ") + " |         ||%V = " + str(f'{total_gap_long_vol/total_match_vol:.0%}').rjust(3," ")
         if signal_long == "!":
             print(Fore.CYAN + summaryLong + Style.RESET_ALL + signal_long )
         else:
             print(Fore.GREEN + summaryLong + Style.RESET_ALL + signal_long )
         
-        summaryShort = "Total shark SHORT | " + str(short_cnt).rjust(3," ") + " | Total gapVol SHORT|         | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " | %V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")
+        summaryShort = "Total shark SHORT | " + str(short_cnt).rjust(3," ") + " ||Total gapVol SHORT|         | " + str(f"{total_gap_short_vol:,d}").rjust(7," ") + " ||%V = " + str(f'{total_gap_short_vol/total_match_vol:.0%}').rjust(3," ")
         if signal_short == "!":
             print(Fore.WHITE + summaryShort + Style.RESET_ALL + signal_short)
         else:
             print(Fore.RED + summaryShort + Style.RESET_ALL + signal_short)
     except:
+        summaryLong = ""
+        summaryShort = ""
         pass
     print ("---------------------------------------------------------------------------")    
     
@@ -133,6 +136,9 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     fSum.write(inputDate + "|||||\n")
     fSum.write(summaryLong + "\n")
     fSum.write(summaryShort + "\n")
-    fSum.close()    
+    fSum.close()
+    
+    chatBotTelegram.send_test_message(folderName + "\n" + summaryLong.replace("||", "\n") + "\n" + summaryShort.replace("||", "\n") + "\n")
+    print ("---------------------------------------------------------------------------")        
 if __name__=="__main__":
     intradaySearchFunction("05/08/2022", "VN30F2208", "0.8", "09:00:00", "14:30:00")
