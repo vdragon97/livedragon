@@ -61,6 +61,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     #add column name
     f.write("TradeTime|Bid1|MatchedPrice|Offer1|Shark|gapLongVol|gapShortVol|MTotalVol" + "\n")
     signal_yn = "N"
+    smsTelegram = ""
     for x in reversed(range(size)):
         if list[x]['TradeTime'] > "09:00:00" and list[x]['TradeTime'] > inputFromTime and list[x]['TradeTime'] < "14:30:00" and list[x]['TradeTime'] < inputToTime and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
             #f.seek(0) #get to the first position
@@ -77,6 +78,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                         n = n + 1
                     gapLongVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     output_long = output_price + " |  LONG | " + str(f"{gapLongVol:,d}").rjust(7," ") + " | " + "        |  " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ")
+                    smsTelegram = str(list[x]['TradeTime']) + "-|-" + str(list[x]['MatchedPrice']) + "-|-BLONG-|-" + str(f"{gapLongVol:,d}").rjust(7,"-") + "\n" + smsTelegram
                     print(Fore.GREEN + output_long + Style.RESET_ALL)
                     f.write(output_long)
                     f.write("\n")
@@ -97,6 +99,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                         n = n + 1
                     gapShortVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     output_short = output_price + " | SHORT | " + "        | " + str(f"{gapShortVol:,d}").rjust(7," ") + " |  "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ")
+                    smsTelegram = str(list[x]['TradeTime']) + "-|-" + str(list[x]['MatchedPrice']) + "-|-SHORT-|-" + str(f"{gapShortVol:,d}").rjust(7,"-") + "\n" + smsTelegram
                     print(Fore.RED + output_short + Style.RESET_ALL)
                     f.write(output_short)
                     f.write("\n")
@@ -138,7 +141,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     fSum.write(summaryShort + "\n")
     fSum.close()
     
-    chatBotTelegram.send_test_message(folderName + "\n" + summaryLong.replace("||", "\n") + "\n" + summaryShort.replace("||", "\n") + "\n")
+    chatBotTelegram.send_test_message(folderName + "\n" + smsTelegram + "\n" + summaryLong.replace("||", "\n") + "\n" + summaryShort.replace("||", "\n") + "\n")
     print ("---------------------------------------------------------------------------")        
 if __name__=="__main__":
     intradaySearchFunction("05/08/2022", "VN30F2208", "0.8", "09:00:00", "14:30:00")
