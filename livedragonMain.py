@@ -14,7 +14,7 @@ def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + timedelta(n)
 
-def callLiveDragon(checkDate, checkContract, checkSensitive, checkFromTime, checkToTime):
+def callLiveDragon(checkDate, checkContract, checkSensitive, checkFromTime, checkToTime, previousTableRowCount):
     CookiePartOne = intradayBoard.accessMainPage()
     #print("CookiePartOne = " + CookiePartOne)
     if CookiePartOne =="exitMainPage":
@@ -36,22 +36,24 @@ def callLiveDragon(checkDate, checkContract, checkSensitive, checkFromTime, chec
     print ("---------------------------------------------------------------------------")
     print (Fore.YELLOW + "TradeTime|  Bid1  | MPrice | Offer1 | Shark | g L Vol | g S Vol | MTotalVol" + Style.RESET_ALL)
     print ("---------------------------------------------------------------------------")
-    intradaySearch.intradaySearchFunction(checkDate, checkContract, checkSensitive, Cookie, checkFromTime, checkToTime)
-    
-if __name__=="__main__":    
+    tableRowCount = intradaySearch.intradaySearchFunction(checkDate, checkContract, checkSensitive, Cookie, checkFromTime, checkToTime, previousTableRowCount)
+    return tableRowCount
+if __name__=="__main__":
+    previousTableRowCount = 0
     while(True):
         if (len(sys.argv) == 6):
             #single date
-            callLiveDragon(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+            tableRowCount = callLiveDragon(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], previousTableRowCount)
         elif (len(sys.argv) == 7):
             #from date to date
             fromDate = datetime.strptime(sys.argv[1], "%d/%m/%Y")
             toDate = datetime.strptime(sys.argv[2], "%d/%m/%Y")
             for dt in daterange(fromDate, toDate):
-                callLiveDragon(dt.strftime("%d/%m/%Y"), sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+                tableRowCount = callLiveDragon(dt.strftime("%d/%m/%Y"), sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], previousTableRowCount)
         else: 
             #print(datetime.now().strftime("%d/%m/%Y"))
             #print("VN30F" + datetime.now().strftime("%Y")[2:4] + datetime.now().strftime("%m"))
-            callLiveDragon(datetime.now().strftime("%d/%m/%Y"), "VN30F" + datetime.now().strftime("%Y")[2:4] + datetime.now().strftime("%m"), "0.8", "09:00:00", "14:30:00")
+            tableRowCount = callLiveDragon(datetime.now().strftime("%d/%m/%Y"), "VN30F" + datetime.now().strftime("%Y")[2:4] + datetime.now().strftime("%m"), "0.8", "09:00:00", "14:30:00", previousTableRowCount)
             print("--------------------------------------------------")
+        previousTableRowCount = tableRowCount
         time.sleep(10)

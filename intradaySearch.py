@@ -15,7 +15,7 @@ inputMode: all/ctn
 '''
 init(convert=True)
 
-def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie, inputFromTime, inputToTime):   
+def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie, inputFromTime, inputToTime, previousTableRowCount):   
     url = "https://livedragon.vdsc.com.vn/general/intradaySearch.rv?stockCode=" + inputContract +"&boardDate=" + inputDate
     headers = CaseInsensitiveDict()
     headers["Content-Length"] = "0"
@@ -66,6 +66,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     table.align['Time'] = 'm'
     table.align['Price'] = 'm'
     table.align['Vol'] = 'r'
+    tableRowCount = 0
     #for x in reversed(range(size)):
     for x in range(size):
         if list[x]['TradeTime'] > "09:00:00" and list[x]['TradeTime'] > inputFromTime and list[x]['TradeTime'] < "14:30:00" and list[x]['TradeTime'] < inputToTime and list[x]['BidPrice1'] > 0 and list[x]['MatchedPrice'] > 0 and list[x]['OfferPrice1'] > 0:
@@ -86,6 +87,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                     gapLongVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     output_long = output_price + " |  LONG | " + str(f"{gapLongVol:,d}").rjust(7," ") + " | " + "        |  " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ")
                     table.add_row([trTime, mprice + "L", str(f"{gapLongVol:,d}")])
+                    tableRowCount = tableRowCount + 1
                     print(Fore.GREEN + output_long + Style.RESET_ALL)
                     f.write(output_long)
                     f.write("\n")
@@ -107,6 +109,7 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                     gapShortVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     output_short = output_price + " | SHORT | " + "        | " + str(f"{gapShortVol:,d}").rjust(7," ") + " |  "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ")
                     table.add_row([trTime, mprice + "S", str(f"{gapShortVol:,d}")])
+                    tableRowCount = tableRowCount + 1
                     print(Fore.RED + output_short + Style.RESET_ALL)
                     f.write(output_short)
                     f.write("\n")
@@ -156,9 +159,11 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
     else:
         resultLongShort = "DRAW"
     table.add_row([now.strftime("%Y%m%d"),resultLongShort,str(f"{abs(diffLongShort):,d}")])    
-    if sensitive == 0.8:
-        chatBotTelegram.send_test_message(f'<pre>{table}</pre>')
-        
-    print ("---------------------------------------------------------------------------")        
+    if (sensitive == 0.8) and (tableRowCount > previousTableRowCount):
+        #print("previousTableRowCount = " + str(previousTableRowCount))
+        #print("tableRowCount = " + str(tableRowCount))
+        chatBotTelegram.send_test_message(f'<pre>{table}</pre>')        
+    print ("---------------------------------------------------------------------------")
+    return tableRowCount
 if __name__=="__main__":
     intradaySearchFunction("05/08/2022", "VN30F2208", "0.8", "09:00:00", "14:30:00")
