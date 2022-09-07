@@ -86,8 +86,9 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                         n = n + 1
                     gapLongVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     output_long = output_price + " |  LONG | " + str(f"{gapLongVol:,d}").rjust(7," ") + " | " + "        |  " + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ")
-                    table.add_row([trTime, mprice + "L", str(f"{gapLongVol:,d}")])
-                    tableRowCount = tableRowCount + 1
+                    if gapLongVol > 3000:
+                        table.add_row([trTime, mprice + "L", str(f"{gapLongVol:,d}")])
+                        tableRowCount = tableRowCount + 1
                     print(Fore.GREEN + output_long + Style.RESET_ALL)
                     f.write(output_long)
                     f.write("\n")
@@ -108,8 +109,9 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
                         n = n + 1
                     gapShortVol = max(listMatchedTotalVol) - min(listMatchedTotalVol)
                     output_short = output_price + " | SHORT | " + "        | " + str(f"{gapShortVol:,d}").rjust(7," ") + " |  "  + str(f"{list[x]['MatchedTotalVol']:,d}").rjust(8," ")
-                    table.add_row([trTime, mprice + "S", str(f"{gapShortVol:,d}")])
-                    tableRowCount = tableRowCount + 1
+                    if gapShortVol > 3000:
+                        table.add_row([trTime, mprice + "S", str(f"{gapShortVol:,d}")])
+                        tableRowCount = tableRowCount + 1
                     print(Fore.RED + output_short + Style.RESET_ALL)
                     f.write(output_short)
                     f.write("\n")
@@ -158,8 +160,8 @@ def intradaySearchFunction(inputDate, inputContract, inputSensitive, inputCookie
         resultLongShort = "S Win"
     else:
         resultLongShort = "DRAW"
-    table.add_row([now.strftime("%Y%m%d"),resultLongShort,str(f"{abs(diffLongShort):,d}")])    
-    if (sensitive == 0.8) and (tableRowCount > previousTableRowCount):
+    table.add_row([str(datetime.strptime(inputDate, '%d/%m/%Y').date()).replace('-',''),resultLongShort,str(f"{abs(diffLongShort):,d}")])    
+    if (sensitive == 0.8) and (tableRowCount != previousTableRowCount) and (tableRowCount > 0):
         #print("previousTableRowCount = " + str(previousTableRowCount))
         #print("tableRowCount = " + str(tableRowCount))
         chatBotTelegram.send_test_message(f'<pre>{table}</pre>')        
